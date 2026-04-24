@@ -1,10 +1,20 @@
 # sdr-final-project
-on first installation run these in the directory first:
+prerequisites:
+
+in your workspace folder install these first
 ```
 cd src
 git clone -b jazzy https://github.com/ROBOTIS-GIT/DynamixelSDK.git
 git clone -b jazzy https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git
 git clone -b jazzy https://github.com/ROBOTIS-GIT/turtlebot3.git
+cd ..
+colcon build --symlink-install
+```
+
+to install this run:
+```
+cd src
+git clone https://github.com/clickyquack/sdr-final-project.git
 cd ..
 colcon build --symlink-install
 ```
