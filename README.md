@@ -18,6 +18,11 @@ git clone https://github.com/clickyquack/sdr-final-project.git
 cd ..
 colcon build --symlink-install
 ```
+to install any updates run this in the sdr-final-project directory:
+
+```
+git pull
+```
 
 every time you open a new terminal for this run:
 ```
