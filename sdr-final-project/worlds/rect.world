@@ -1,0 +1,200 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="rect">
+    <!-- Gazebo Sim requires these "systems" plugins for physics + sensors (e.g. lidar). -->
+    <plugin
+      filename="gz-sim-physics-system"
+      name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin
+      filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin
+      filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin
+      filename="gz-sim-sensors-system"
+      name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin
+      filename="gz-sim-imu-system"
+      name="gz::sim::systems::Imu">
+    </plugin>
+
+    <physics type="ode">
+      <real_time_update_rate>1000.0</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>150</iters>
+          <precon_iters>0</precon_iters>
+          <sor>1.400000</sor>
+          <use_dynamic_moi_rescaling>1</use_dynamic_moi_rescaling>
+        </solver>
+        <constraints>
+          <cfm>0.00001</cfm>
+          <erp>0.2</erp>
+          <contact_max_correcting_vel>2000.000000</contact_max_correcting_vel>
+          <contact_surface_layer>0.01000</contact_surface_layer>
+        </constraints>
+      </ode>
+    </physics>
+
+    <!-- Self-contained lighting + ground (no model:// dependencies) -->
+    <gravity>0 0 -9.8</gravity>
+
+    <light name="sun" type="directional">
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -1</direction>
+      <cast_shadows>true</cast_shadows>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="ground_link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>200 200</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>200 200</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="maze_walls">
+      <static>true</static>
+
+      <!--
+        All dimensions are in meters.
+
+        Layout (feet -> meters):
+        - Outer rectangle: 16 ft (E-W) x 8 ft (N-S) = 4.8768 x 2.4384
+        - Middle wall: 6 ft (E-W) = 1.8288
+        - Perpendicular stubs on each middle-wall end: 2 ft (N-S) = 0.6096
+        - Side juts: 1.5 ft = 0.4572
+        - East-side offset jut location: 2.5 ft above south side = 0.7620
+        - NE corner square: 1.5 ft x 1.5 ft = 0.4572 x 0.4572
+
+        Common:
+        - wall_t = 0.10
+        - wall_h = 1.00
+      -->
+
+      <!-- Outer boundary -->
+      <link name="wall_north">
+        <pose>0 1.2692 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>4.8768 0.1 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>4.8768 0.1 1.0</size></box></geometry></visual>
+      </link>
+      <link name="wall_south">
+        <pose>0 -1.2692 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>4.8768 0.1 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>4.8768 0.1 1.0</size></box></geometry></visual>
+      </link>
+      <link name="wall_west">
+        <pose>-2.4884 0 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.1 2.4384 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.1 2.4384 1.0</size></box></geometry></visual>
+      </link>
+      <link name="wall_east">
+        <pose>2.4884 0 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.1 2.4384 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.1 2.4384 1.0</size></box></geometry></visual>
+      </link>
+
+      <!-- Center wall (east-west), centered in the rectangle -->
+      <link name="wall_middle">
+        <pose>0 0 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>1.8288 0.1 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>1.8288 0.1 1.0</size></box></geometry></visual>
+      </link>
+
+      <!-- 2-ft perpendicular stubs at the ends of the middle wall -->
+      <link name="wall_middle_stub_west">
+        <pose>-0.9144 0 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.1 0.6096 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.1 0.6096 1.0</size></box></geometry></visual>
+      </link>
+      <link name="wall_middle_stub_east">
+        <pose>0.9144 0 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.1 0.6096 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.1 0.6096 1.0</size></box></geometry></visual>
+      </link>
+
+      <!-- 1.5-ft juts from the middle of each outer side (except east side) -->
+      <link name="jut_from_north">
+        <pose>0 0.9906 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.1 0.4572 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.1 0.4572 1.0</size></box></geometry></visual>
+      </link>
+      <link name="jut_from_south">
+        <pose>0 -0.9906 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.1 0.4572 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.1 0.4572 1.0</size></box></geometry></visual>
+      </link>
+      <link name="jut_from_west">
+        <pose>-2.2098 0 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.4572 0.1 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.4572 0.1 1.0</size></box></geometry></visual>
+      </link>
+
+      <!-- East side: 1.5-ft jut located 2.5 ft above south side -->
+      <link name="jut_from_east_offset">
+        <pose>2.2098 -0.4572 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.4572 0.1 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.4572 0.1 1.0</size></box></geometry></visual>
+      </link>
+
+      <!-- NE corner: 1.5-ft x 1.5-ft square of walls -->
+      <link name="ne_square_north">
+        <pose>2.1598 1.1692 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.4572 0.1 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.4572 0.1 1.0</size></box></geometry></visual>
+      </link>
+      <link name="ne_square_south">
+        <pose>2.1598 0.7120 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.4572 0.1 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.4572 0.1 1.0</size></box></geometry></visual>
+      </link>
+      <link name="ne_square_east">
+        <pose>2.3884 0.9406 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.1 0.4572 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.1 0.4572 1.0</size></box></geometry></visual>
+      </link>
+      <link name="ne_square_west">
+        <pose>1.9312 0.9406 0.5 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.1 0.4572 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.1 0.4572 1.0</size></box></geometry></visual>
+      </link>
+    </model>
+  </world>
+</sdf>
+
